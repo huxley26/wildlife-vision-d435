@@ -1,0 +1,6 @@
+# Set path to your local dataset root. This example contains no bundled dataset.
+path: /absolute/path/to/dataset
+train: images/train
+val: images/val
+nc: 5
+names: [wolf, tiger, monkey, peacock, elephant]

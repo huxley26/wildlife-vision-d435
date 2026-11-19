@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.idea/
+.vscode/
+datasets/
+captures/
+synthetic/
+runs/
+config/data.local.yaml
+*.bag
+*.mp4
+*.avi

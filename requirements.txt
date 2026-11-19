@@ -1,0 +1,6 @@
+# Historical Ultralytics version recovered from local source and checkpoint.
+# Install a compatible torch/torchvision pair for your CPU/GPU separately.
+ultralytics==8.2.103
+numpy<2
+opencv-python>=4.6
+pyrealsense2

@@ -1,0 +1,31 @@
+{
+  "train": {
+    "images": 3929,
+    "labels": 3764,
+    "images_without_labels": 167,
+    "labels_without_images": 2,
+    "boxes_per_class": {
+      "0": 751,
+      "3": 877,
+      "1": 871,
+      "2": 872,
+      "4": 824
+    },
+    "invalid_rows": []
+  },
+  "val": {
+    "images": 72,
+    "labels": 53,
+    "images_without_labels": 19,
+    "labels_without_images": 0,
+    "boxes_per_class": {
+      "1": 24,
+      "4": 20,
+      "0": 19,
+      "3": 27,
+      "2": 31
+    },
+    "invalid_rows": []
+  },
+  "exact_image_hash_overlap": 0
+}
