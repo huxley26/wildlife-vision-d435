@@ -1,15 +1,59 @@
-# D435 + YOLOv8 野生动物识别与平面定位
+# UAV wildlife detection and ground-plane localization
 
-## UAV Wildlife Detection and Localization
+[中文说明](#中文说明)
 
-I built the vision module for a student UAV competition. It detects five
-animal classes in images from an Intel RealSense D435, counts detections
-in a central survey area, and publishes the results over ROS.
+I led the vision module for a UAV survey task in the 2025 National Undergraduate Electronic Design Contest. Using color images from an Intel RealSense D435, the system detects five animal classes, counts those inside a central survey area and publishes their offsets to an onboard computer over ROS. Our team earned second prize in Jiangsu.
 
-I collected and labeled training images, trained the YOLOv8 detector, and
-integrated it with the camera and ROS. To estimate each detection's offset
-from the image center in centimeters, I used the camera intrinsics and a
-known flight height. A five-frame vote stabilizes the animal counts.
+## From camera frames to survey results
+
+I collected and labeled images, trained the YOLOv8n detector, and integrated camera acquisition, localization and ROS messaging. When the initial model overfit, I supplemented the synthetic training images with field photographs and retrained the detector.
+
+1. **Detect and filter.** A color frame goes through YOLOv8n. The camera intrinsics and known camera height define a central 50 × 50 cm region on the ground plane.
+2. **Estimate position.** The system converts image offsets to centimeters assuming a downward-facing camera and approximately level ground. It uses the color stream and a supplied height; the output is relative to the image center.
+3. **Aggregate and publish.** A five-frame vote stabilizes class counts. The module averages offsets by class and publishes the results as JSON in a ROS 1 string message. A class mean describes the group when multiple targets share a class.
+
+[Detection and aggregation logic](inference/detection_core.py) · [ROS publisher](inference/ros_publisher.py) · [Message fields and coordinate convention](docs/protocol.md)
+
+## Historical validation results
+
+The repository includes the [train13 checkpoint](models/best.pt), its [checksum](models/SHA256SUMS) and the [epoch log](reports/train13/results.csv). The model was trained for 88 epochs at image size 960 with batch size 16. Its five classes are wolf, tiger, monkey, peacock and elephant.
+
+| Historical validation record | mAP@0.50 | mAP@0.50:0.95 |
+| --- | ---: | ---: |
+| Published best checkpoint, epoch 35 | 99.25% | 65.32% |
+| Final logged epoch, epoch 88 | 97.12% | 61.34% |
+
+These scores describe the saved training run. Field performance and end-to-end latency would need separate measurements. A later [dataset audit](reports/dataset_audit.json) found that 19 of the 72 available validation images lacked matching label files. Their status as intentional background examples or missing annotations remains unresolved. The full image dataset is outside this release.
+
+[Training curves](reports/train13/results.png) · [Confusion matrix](reports/train13/confusion_matrix.png) · [Training entry point](training/train.py)
+
+## Run the project
+
+**Without hardware.** Run the [five regression tests](tests/test_logic.py) from the repository root. They cover class ordering, count and offset aggregation, fixed-height geometry and checkpoint integrity.
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+**With a D435 and ROS 1.** The historical setup used Ubuntu 20.04 and ROS Noetic. Prepare ROS, RealSense and the Python dependencies using the [deployment guide (Chinese)](docs/deployment.md). Source the ROS environment in each terminal. Start `roscore` in the first terminal, then run the following from the repository root in two more terminals.
+
+```bash
+# Terminal 2: set the height to the measured camera-to-plane distance in cm.
+python inference/ros_publisher.py --weights models/best.pt --height-cm 120
+```
+
+```bash
+# Terminal 3: inspect the messages published on /animal_detections.
+python inference/ros_subscriber.py
+```
+
+This release reconstructs the vision module from competition materials. Hardware-independent checks have been run; the published snapshot still awaits an end-to-end D435/ROS retest. Flight control and route planning belonged to other parts of the team project.
+
+[Dataset configuration](config/data.example.yaml) · [Collection and dataset tools](tools/) · [Source history and changes](docs/provenance.md) · [Third-party components](THIRD_PARTY.md)
+
+## 中文说明
+
+### D435 + YOLOv8 野生动物识别与平面定位
 
 电赛野生动物巡查项目的视觉部分：用 Intel RealSense D435 获取彩色图像，使用本地训练的 YOLOv8 检测五类动物，在中央区域统计数量，以相机内参和固定高度估计平面偏移，通过 ROS 发布结果。
 
