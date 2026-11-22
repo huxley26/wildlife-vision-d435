@@ -1,5 +1,16 @@
 # D435 + YOLOv8 野生动物识别与平面定位
 
+## UAV Wildlife Detection and Localization
+
+I built the vision module for a student UAV competition. It detects five
+animal classes in images from an Intel RealSense D435, counts detections
+in a central survey area, and publishes the results over ROS.
+
+I collected and labeled training images, trained the YOLOv8 detector, and
+integrated it with the camera and ROS. To estimate each detection's offset
+from the image center in centimeters, I used the camera intrinsics and a
+known flight height. A five-frame vote stabilizes the animal counts.
+
 电赛野生动物巡查项目的视觉部分：用 Intel RealSense D435 获取彩色图像，使用本地训练的 YOLOv8 检测五类动物，在中央区域统计数量，以相机内参和固定高度估计平面偏移，通过 ROS 发布结果。
 
 **个人负责：数据采集与标注、YOLOv8 训练、D435 定位及 ROS 通信。** 无人机飞控、航线规划和地面站不在本仓库实现范围内。
